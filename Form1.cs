@@ -2,197 +2,156 @@ namespace Shoppingcart21
 {
     public partial class Form1 : Form
     {
+        private Dictionary<string, Item> items = new Dictionary<string, Item>();
+
         public Form1()
         {
             InitializeComponent();
+            InitializeItems();
+        }
+
+        private void InitializeItems()
+        {
+            // Initialize the items in the Dictionary
+            items.Add("Coffee", new Item { Name = "Coffee", Price = 125, Quantity = 0, IsChecked = false });
+            items.Add("GreenTea", new Item { Name = "Green Tea", Price = 100, Quantity = 0, IsChecked = false });
+            items.Add("Noodle", new Item { Name = "Noodle", Price = 60, Quantity = 0, IsChecked = false });
+            items.Add("Pizza", new Item { Name = "Pizza", Price = 399, Quantity = 0, IsChecked = false });
+
+            tbCoffeePrice.Text = items["Coffee"].Price.ToString("F2");
+            tbGreenTeaPrice.Text = items["GreenTea"].Price.ToString("F2");
+            tbNoodlePrice.Text = items["Noodle"].Price.ToString("F2");
+            tbPizzaPrice.Text = items["Pizza"].Price.ToString("F2");
+
+            // Make the price text boxes read-only
+            tbCoffeePrice.ReadOnly = true;
+            tbGreenTeaPrice.ReadOnly = true;
+            tbNoodlePrice.ReadOnly = true;
+            tbPizzaPrice.ReadOnly = true;
         }
 
         private void btcheck_out_Click(object sender, EventArgs e)
         {
-            
-            string strCoffeePrice = tbCoffeePrice.Text;
-            string strCoffeeQuantity = tbCoffeeQuantity.Text;
-
-            string strNoodlePrice = tbNoodlePrice.Text;
-            string strNoodleQuantity = tbNoodleQuantity.Text;
-
-            
-            string strGreenTeaPrice = tbGreenTeaPrice.Text;
-            string strGreenTeaQuantity = tbGreenTeaQuantity.Text;
-
-           
-            string strPizzaPrice = tbPizzaPrice.Text;
-            string strPizzaQuantity = tbPizzaQuantity.Text;
-
-            
-            string strCash = tbCash.Text;
-            string strDiscountAll = tbDiscountAll.Text;
-            string strDiscountDrinks = tbDiscountDrinks.Text;
-            string strDiscountFood = tbDiscountFood.Text;
-
-            double iCoffeePrice = 0;
-            double iCoffeeQuantity = 0;
-            double iGreenTeaPrice = 0;
-            double iGreenTeaQuantity = 0;
-            double iNoodlePrice = 0;
-            double iNoodleQuantity = 0;
-            double iPizzaPrice = 0;
-            double iPizzaQuantity = 0;
-            double iTotal = 0;
-            double iCash = 0;
-            double iChange = 0;
-
-            double discountAmount = 0; 
-
-            double discountAll = 0;
-            double discountDrinks = 0;
-            double discountFood = 0;
-
             try
             {
-                
-                if (cbCoffee.Checked)
+                // Update item quantities and checked states in the Dictionary
+                UpdateItem("Coffee", tbCoffeeQuantity.Text, cbCoffee.Checked);
+                UpdateItem("GreenTea", tbGreenTeaQuantity.Text, cbGreenTea.Checked);
+                UpdateItem("Noodle", tbNoodleQuantity.Text, cbNoodle.Checked);
+                UpdateItem("Pizza", tbPizzaQuantity.Text, cbPizza.Checked);
+
+                // Retrieve input values for cash and discounts
+                double iCash = string.IsNullOrWhiteSpace(tbCash.Text) ? 0 : double.Parse(tbCash.Text);
+                double discountAll = string.IsNullOrWhiteSpace(tbDiscountAll.Text) ? 0 : double.Parse(tbDiscountAll.Text) / 100;
+                double discountDrinks = string.IsNullOrWhiteSpace(tbDiscountDrinks.Text) ? 0 : double.Parse(tbDiscountDrinks.Text) / 100;
+                double discountFood = string.IsNullOrWhiteSpace(tbDiscountFood.Text) ? 0 : double.Parse(tbDiscountFood.Text) / 100;
+
+                // Calculate totals for drinks and food
+                double drinksTotal = GetTotal(new[] { "Coffee", "GreenTea" });
+                double foodTotal = GetTotal(new[] { "Noodle", "Pizza" });
+                double iTotal = drinksTotal + foodTotal;
+
+                // Apply discounts
+                double discountAmount = 0;
+                if (cbAll.Checked && discountAll > 0)
                 {
-                    iCoffeePrice = double.Parse(strCoffeePrice);
-                    iCoffeeQuantity = double.Parse(strCoffeeQuantity);
+                    discountAmount = iTotal * discountAll; // Apply overall discount
+                    iTotal -= discountAmount;
+                }
+                else
+                {
+                    if (cbBeverage.Checked && discountDrinks > 0)
+                    {
+                        double drinksDiscount = drinksTotal * discountDrinks;
+                        discountAmount += drinksDiscount;
+                        drinksTotal -= drinksDiscount;
+                    }
+                    if (cbFood.Checked && discountFood > 0)
+                    {
+                        double foodDiscount = foodTotal * discountFood;
+                        discountAmount += foodDiscount;
+                        foodTotal -= foodDiscount;
+                    }
+                    iTotal = drinksTotal + foodTotal; // Recalculate total after category discounts
                 }
 
-                
-                if (cbGreenTea.Checked)
-                {
-                    iGreenTeaPrice = double.Parse(strGreenTeaPrice);
-                    iGreenTeaQuantity = double.Parse(strGreenTeaQuantity);
-                }
+                // Calculate change
+                double iChange = iCash - iTotal;
 
-                
-                if (cbNoodle.Checked)
-                {
-                    iNoodlePrice = double.Parse(strNoodlePrice);
-                    iNoodleQuantity = double.Parse(strNoodleQuantity);
-                }
+                // Display discount amount, total, and change
+                tbDiscountAmount.Text = discountAmount.ToString("F2");
+                tbTotal.Text = iTotal.ToString("F2");
+                tbChange.Text = iChange.ToString("F2");
 
-                
-                if (cbPizza.Checked)
-                {
-                    iPizzaPrice = double.Parse(strPizzaPrice);
-                    iPizzaQuantity = double.Parse(strPizzaQuantity);
-                }
-
-                
-                iCash = double.Parse(strCash);
-
-                
-                discountAll = string.IsNullOrWhiteSpace(strDiscountAll) ? 0 : double.Parse(strDiscountAll) / 100;
-                discountDrinks = string.IsNullOrWhiteSpace(strDiscountDrinks) ? 0 : double.Parse(strDiscountDrinks) / 100;
-                discountFood = string.IsNullOrWhiteSpace(strDiscountFood) ? 0 : double.Parse(strDiscountFood) / 100;
+                // Display change breakdown
+                DisplayChange(iChange);
             }
             catch (Exception ex)
             {
-                iCoffeePrice = 0;
-                iCoffeeQuantity = 0;
-                iGreenTeaPrice = 0;
-                iGreenTeaQuantity = 0;
-                iNoodlePrice = 0;
-                iNoodleQuantity = 0;
-                iPizzaPrice = 0;
-                iPizzaQuantity = 0;
-                iCash = 0;
-                discountAll = 0;
-                discountDrinks = 0;
-                discountFood = 0;
+                MessageBox.Show("An error occurred while calculating: " + ex.Message);
             }
+        }
 
-           
-            double drinksTotal = (iCoffeePrice * iCoffeeQuantity) + (iGreenTeaPrice * iGreenTeaQuantity);
-            double foodTotal = (iNoodlePrice * iNoodleQuantity) + (iPizzaPrice * iPizzaQuantity);
-
-            iTotal = drinksTotal + foodTotal;
-
-            if (cbAll.Checked && discountAll > 0)
+        private void UpdateItem(string itemName, string quantityText, bool isChecked)
+        {
+            if (items.ContainsKey(itemName))
             {
-                discountAmount = iTotal * discountAll; 
-                iTotal -= discountAmount;             
+                var item = items[itemName];
+                item.Quantity = string.IsNullOrWhiteSpace(quantityText) ? 0 : int.Parse(quantityText);
+                item.IsChecked = isChecked;
             }
-            else
+        }
+
+        private double GetTotal(string[] itemNames)
+        {
+            double total = 0;
+            foreach (var itemName in itemNames)
             {
-                if (cbBeverage.Checked && discountDrinks > 0)
+                if (items.ContainsKey(itemName) && items[itemName].IsChecked)
                 {
-                    discountAmount = drinksTotal * discountDrinks; 
-                    drinksTotal -= discountAmount;                
+                    var item = items[itemName];
+                    total += item.Price * item.Quantity;
                 }
-                else if (cbFood.Checked && discountFood > 0)
-                {
-                    discountAmount = foodTotal * discountFood;    
-                    foodTotal -= discountAmount;                 
-                }
-
-                iTotal = drinksTotal + foodTotal;
             }
+            return total;
+        }
 
-            
-            iChange = iCash - iTotal;
-
-        
-            tbDiscountAmount.Text = discountAmount.ToString("F2");
-
-            tbTotal.Text = iTotal.ToString("F2");
-            tbChange.Text = iChange.ToString("F2");
-
-          ­
+        private void DisplayChange(double iChange)
+        {
             int[] denominations = { 1000, 500, 100, 50, 20, 10, 5, 1 };
             TextBox[] denominationTextBoxes = { tb1000, tb500, tb100, tb50, tb20, tb10, tb5, tb1 };
 
-        
             for (int i = 0; i < denominations.Length; i++)
             {
-                int count = (int)(iChange / denominations[i]); ­
-                iChange %= denominations[i];                  
+                int count = (int)(iChange / denominations[i]);
+                iChange %= denominations[i];
                 denominationTextBoxes[i].Text = count.ToString();
             }
         }
 
         private void btClear_Click(object sender, EventArgs e)
         {
-         
-            tbCoffeePrice.Text = "";
-            tbCoffeeQuantity.Text = "";
-            tbGreenTeaQuantity.Text = "";
-            tbGreenTeaPrice.Text = "";
-            tbNoodlePrice.Text = "";
-            tbNoodleQuantity.Text = "";
-            tbPizzaPrice.Text = "";
-            tbPizzaQuantity.Text = "";
+            foreach (var item in items.Values)
+            {
+                item.Quantity = 0;
+                item.IsChecked = false;
+            }
 
-        
-            tbTotal.Text = "";
-            tbCash.Text = "";
-            tbChange.Text = "";
-         
-            tbDiscountAll.Text = "";
-            tbDiscountDrinks.Text = "";
-            tbDiscountFood.Text = "";
-            tbDiscountAmount.Text = "0.00";  
+            tbCoffeeQuantity.Text = tbGreenTeaQuantity.Text = tbNoodleQuantity.Text = tbPizzaQuantity.Text = "";
+            tbCash.Text = tbDiscountAll.Text = tbDiscountDrinks.Text = tbDiscountFood.Text = "0";
+            tbDiscountAmount.Text = tbTotal.Text = tbChange.Text = "0.00";
+            tb1000.Text = tb500.Text = tb100.Text = tb50.Text = tb20.Text = tb10.Text = tb5.Text = tb1.Text = "";
 
-        ­
-            tb1000.Text = "";
-            tb500.Text = "";
-            tb100.Text = "";
-            tb50.Text = "";
-            tb20.Text = "";
-            tb10.Text = "";
-            tb5.Text = "";
-            tb1.Text = "";
-
-        
-            cbCoffee.Checked = false;
-            cbGreenTea.Checked = false;
-            cbNoodle.Checked = false;
-            cbPizza.Checked = false;
-            cbAll.Checked = false;
-            cbBeverage.Checked = false;
-            cbFood.Checked = false;
+            cbCoffee.Checked = cbGreenTea.Checked = cbNoodle.Checked = cbPizza.Checked = false;
+            cbAll.Checked = cbBeverage.Checked = cbFood.Checked = false;
         }
-
     }
 
+    public class Item
+    {
+        public string Name { get; set; }
+        public double Price { get; set; }
+        public int Quantity { get; set; }
+        public bool IsChecked { get; set; }
+    }
 }

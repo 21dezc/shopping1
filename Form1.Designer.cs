@@ -396,7 +396,7 @@
             // lbTotal
             // 
             lbTotal.AutoSize = true;
-            lbTotal.Location = new Point(668, 66);
+            lbTotal.Location = new Point(668, 112);
             lbTotal.Name = "lbTotal";
             lbTotal.Size = new Size(42, 20);
             lbTotal.TabIndex = 10;
@@ -450,7 +450,7 @@
             // lbCash
             // 
             lbCash.AutoSize = true;
-            lbCash.Location = new Point(668, 102);
+            lbCash.Location = new Point(668, 73);
             lbCash.Name = "lbCash";
             lbCash.Size = new Size(40, 20);
             lbCash.TabIndex = 16;
@@ -494,14 +494,14 @@
             // 
             // tbTotal
             // 
-            tbTotal.Location = new Point(752, 60);
+            tbTotal.Location = new Point(752, 106);
             tbTotal.Name = "tbTotal";
             tbTotal.Size = new Size(125, 27);
             tbTotal.TabIndex = 5;
             // 
             // tbCash
             // 
-            tbCash.Location = new Point(752, 99);
+            tbCash.Location = new Point(752, 70);
             tbCash.Name = "tbCash";
             tbCash.Size = new Size(125, 27);
             tbCash.TabIndex = 21;
